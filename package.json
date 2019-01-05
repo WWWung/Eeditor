@@ -1,0 +1,30 @@
+{
+    "scripts": {
+        "dev": "rollup -w -c config.js --environment TARGET:web",
+        "dev:cjs": "rollup -w -c config.js --environment TARGET:node"
+    },
+    "dependencies": {
+        "autoprefixer": "^9.4.4",
+        "cssnano": "^4.1.8",
+        "rollup": "^1.0.1",
+        "rollup-plugin-commonjs": "^9.2.0",
+        "rollup-plugin-node-resolve": "^4.0.0",
+        "rollup-plugin-typescript": "^1.0.0"
+    },
+    "name": "editor",
+    "version": "1.0.0",
+    "description": "a web editor",
+    "main": "config.js",
+    "directories": {
+        "test": "test"
+    },
+    "devDependencies": {
+        "rollup-plugin-postcss": "^1.6.3"
+    },
+    "keywords": [
+        "editor",
+        "javascript"
+    ],
+    "author": "wwwung",
+    "license": "ISC"
+}
