@@ -12,7 +12,7 @@
         "rollup-plugin-typescript": "^1.0.0"
     },
     "name": "eeditor",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "a web editor",
     "main": "dist/editor.common.js",
     "directories": {
