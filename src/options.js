@@ -10,7 +10,9 @@ export function initOpts(options, e) {
     const el = e.el = query(options.el)
     const tools = e.tools = normalizeTools(options.tools)
 
-    normalizeStyle(options)
+    normalizeStyle(options, el)
+
+    e.options = options
 }
 
 function normalizeTools(tools) {
@@ -21,8 +23,8 @@ function normalizeTools(tools) {
 }
 
 function normalizeStyle(options, el) {
-    w = options.width || getStyle(el, 'width')
-    h = options.height || getStyle(el, 'height')
+    const w = options.width || getStyle(el, 'width')
+    const h = options.height || getStyle(el, 'height')
     options.width = max(w, 600)
     options.height = max(h, 300)
 }

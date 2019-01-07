@@ -1,4 +1,11 @@
-body {
-    height: 600px;
-    background: red;
+.editor-wrap {
+    border: 1px solid #e0e1e5;
+}
+
+.editor-toolbar {
+    height: 46px;
+    border-bottom: 1px solid rgba(0, 0, 0, .05);
+    padding: 10px 0;
+    box-sizing: border-box;
+    background: url('./imgs/ds.png');
 }

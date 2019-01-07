@@ -1,19 +1,12 @@
-import { initOpts } from './options.js'
 import './style/index.css'
-
+import { init } from './init.js'
 let uid = 0
-
-class Editor {
-    constructor(options) {
-        this.init(options)
-    }
-    init(options) {
-        const e = this
-        e.id = uid++
-            initOpts(options, e)
+class Eeditor {
+    constructor() {
+        this.id = uid++
     }
 }
 
-// init(Editor)
+init(Eeditor)
 
-export default Editor
+export default Eeditor

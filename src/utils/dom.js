@@ -22,7 +22,7 @@ export function elementCreater(html) {
     }
     if (html.indexOf('<') >= 0) {
         div.innerHTML = html
-        return div.children
+        return div.children[0]
     }
     return document.createElement(html)
 }

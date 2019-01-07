@@ -8,7 +8,7 @@ export function makeMap(keys) {
     for (let i = 0; i < arr.length; i++) {
         map[arr[i]] = true
     }
-    return k => map[key]
+    return k => map[k]
 }
 
 export function toInt(v) {

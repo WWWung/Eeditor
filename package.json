@@ -11,19 +11,22 @@
         "rollup-plugin-node-resolve": "^4.0.0",
         "rollup-plugin-typescript": "^1.0.0"
     },
-    "name": "editor",
+    "name": "eeditor",
     "version": "1.0.0",
     "description": "a web editor",
-    "main": "config.js",
+    "main": "dist/editor.common.js",
     "directories": {
         "test": "test"
     },
     "devDependencies": {
         "rollup-plugin-postcss": "^1.6.3"
     },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/WWWung/Eeditor"
+    },
     "keywords": [
-        "editor",
-        "javascript"
+        "eeditor"
     ],
     "author": "wwwung",
     "license": "ISC"

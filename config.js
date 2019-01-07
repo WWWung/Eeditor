@@ -11,7 +11,7 @@ const builds = {
         output: {
             file: './dist/editor.js',
             format: 'umd',
-            name: 'eEditor'
+            name: 'Eeditor'
         },
         plugins: [
             resolve(),
@@ -27,13 +27,13 @@ const builds = {
         output: {
             file: './dist/editor.common.js',
             format: 'cjs',
-            name: 'eEditor'
+            name: 'Eeditor'
         },
         plugins: [
             resolve(),
             node(),
             postcss({
-                extensions: ['.css'],
+                extensions: ['.css', '.png'],
             }),
             cjs()
         ]
@@ -50,7 +50,6 @@ const getConfig = name => {
         },
         plugins: opts.plugins
     }
-    config.output.name = 'eEditor'
     return config
 }
 
