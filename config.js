@@ -2,7 +2,8 @@ import resolve from 'rollup-plugin-node-resolve'
 import cjs from 'rollup-plugin-commonjs'
 import node from 'rollup-plugin-node-resolve'
 import postcss from 'rollup-plugin-postcss'
-import { setFlagsFromString } from 'v8';
+import replace from 'rollup-plugin-replace'
+import babel from 'rollup-plugin-babel'
 
 
 const builds = {
@@ -13,14 +14,7 @@ const builds = {
             format: 'umd',
             name: 'Eeditor'
         },
-        plugins: [
-            resolve(),
-            node(),
-            postcss({
-                extensions: ['.css'],
-            }),
-            cjs()
-        ]
+        plugins: []
     },
     'node': {
         input: 'src/index.js',
@@ -30,11 +24,7 @@ const builds = {
             name: 'Eeditor'
         },
         plugins: [
-            resolve(),
             node(),
-            postcss({
-                extensions: ['.css', '.png'],
-            }),
             cjs()
         ]
     }
@@ -48,7 +38,15 @@ const getConfig = name => {
             file: './dist/editor.js',
             format: 'cjs'
         },
-        plugins: opts.plugins
+        plugins: [
+            resolve(),
+            replace({
+                __FORMAT__: process.env.TARGET || 'umd'
+            }),
+            babel({
+                exclude: 'node_modules/**'
+            })
+        ].concat(opts.plugins)
     }
     return config
 }

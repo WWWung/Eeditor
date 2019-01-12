@@ -1,0 +1,225 @@
+@font-face {
+    font-family: 'icomoon';
+    src: url('fonts/icomoon.woff?1as4nt') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="eticon-"],
+[class*=" eticon-"] {
+    font-family: 'icomoon' !important;
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #1a1a1a;
+}
+
+.eticon-paint-format:before {
+    content: "\e90c";
+}
+
+.eticon-image:before {
+    content: "\e90d";
+}
+
+.eticon-undo:before {
+    content: "\e967";
+}
+
+.eticon-redo:before {
+    content: "\e968";
+}
+
+.eticon-list-numbered:before {
+    content: "\e9b9";
+}
+
+.eticon-list:before {
+    content: "\e9bb";
+}
+
+.eticon-link:before {
+    content: "\e9cb";
+}
+
+.eticon-font:before {
+    content: "\ea5c";
+}
+
+.eticon-font-size:before {
+    content: "\ea61";
+}
+
+.eticon-bold:before {
+    content: "\ea62";
+}
+
+.eticon-underline:before {
+    content: "\ea63";
+}
+
+.eticon-italic:before {
+    content: "\ea64";
+}
+
+.eticon-lineThrough:before {
+    content: "\ea65";
+}
+
+.eticon-color:before {
+    content: "\ea6d";
+}
+
+.eticon-paragraph-left:before {
+    content: "\ea77";
+}
+
+.eticon-paragraph-center:before {
+    content: "\ea78";
+}
+
+.eticon-paragraph-right:before {
+    content: "\ea79";
+}
+
+.eticon-embed2:before {
+    content: "\ea80";
+}
+
+.editor-wrap {
+    border: 1px solid #e0e1e5;
+    position: relative;
+}
+
+.foreColor-button {
+    position: relative;
+}
+
+.foreColor-button::before {
+    border-bottom: 2px solid #ff0000;
+    /* background-color: #ff0000; */
+}
+
+.editor-toolbar {
+    height: 46px;
+    border-bottom: 1px solid rgba(0, 0, 0, .05);
+    padding: 10px 0;
+    box-sizing: border-box;
+}
+
+.ee-tool {
+    line-height: 26px;
+    height: 26px;
+    text-align: center;
+    margin-left: 15px;
+    float: left;
+}
+
+.ee-tool:hover {
+    background-color: #f1f3f6;
+}
+
+.ee-tool-normal {
+    height: 26px;
+    line-height: 26px;
+    cursor: pointer;
+    width: 26px;
+}
+
+.et-active {
+    background-color: #e0f5f8;
+}
+
+.ew {
+    padding: 12px 16px;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 12px;
+    color: #1a1a1a;
+}
+
+.ew::selection,
+.ew *::selection {
+    background-color: #accef7;
+}
+
+
+/* 画板部分 */
+
+.ew-cp {
+    position: absolute;
+    padding: 10px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+
+.ew-hsvp {
+    width: 200px;
+    height: 150px;
+    position: relative;
+    z-index: 10;
+    cursor: crosshair;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ew-hsvc {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    top: 10px;
+    right: 10px;
+    border: 2px solid #fff;
+    overflow: hidden;
+    border-radius: 50%;
+    z-index: 13;
+    box-shadow: 0px 0px 2px rgb(0, 0, 0);
+}
+
+.ew-hsvp-m1,
+.ew-hsvp-m2 {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.ew-hsvp-m1 {
+    background: linear-gradient(180deg, transparent 0, #000);
+    z-index: 11;
+}
+
+.ew-hsvp-m2 {
+    background: linear-gradient(90deg, #fff 0, transparent);
+    z-index: 10;
+}
+
+.ew-hp {
+    position: relative;
+    height: 15px;
+    width: 200px;
+    margin-top: 10px;
+    cursor: pointer;
+    background: linear-gradient(90deg, red 0, #f90 10%, #cdff00 20%, #35ff00 30%, #0f6 40%, #00fffd 50%, #06f 60%, #3200ff 70%, #cd00ff 80%, #f09 90%, red);
+    border-radius: 2px;
+}
+
+.ew-hpc {
+    position: absolute;
+    height: 19px;
+    top: -2px;
+    left: -2px;
+    width: 4px;
+    background: #fff;
+    border: 1px solid #000;
+    border-radius: 1px;
+}

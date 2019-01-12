@@ -5,20 +5,27 @@
     },
     "dependencies": {
         "autoprefixer": "^9.4.4",
+        "babel-preset-latest": "^6.24.1",
         "cssnano": "^4.1.8",
-        "rollup": "^1.0.1",
         "rollup-plugin-commonjs": "^9.2.0",
         "rollup-plugin-node-resolve": "^4.0.0",
+        "rollup-plugin-replace": "^2.1.0",
         "rollup-plugin-typescript": "^1.0.0"
     },
     "name": "eeditor",
-    "version": "1.0.1",
+    "version": "1.0.31",
     "description": "a web editor",
     "main": "dist/editor.common.js",
     "directories": {
         "test": "test"
     },
     "devDependencies": {
+        "babel-core": "^6.26.3",
+        "babel-plugin-external-helpers": "^6.22.0",
+        "babel-preset-env": "^1.7.0",
+        "babel-preset-es2015-rollup": "^3.0.0",
+        "rollup": "^1.0.2",
+        "rollup-plugin-babel": "^3.0.7",
         "rollup-plugin-postcss": "^1.6.3"
     },
     "repository": {

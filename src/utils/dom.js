@@ -35,3 +35,66 @@ export function getStyle(el, name) {
     }
     return style
 }
+
+export function addClass(el, cls) {
+    el.classList.add(cls)
+}
+
+export function removeClass(el, cls) {
+    el.classList.remove(cls)
+}
+
+export function bind(el, type, func) {
+    if (typeof el === 'string') {
+        el = query(el)
+    }
+    try {
+        el.addEventListener(type, func)
+    } catch (error) {
+        console.log(error)
+        console.log(el)
+    }
+}
+
+export function off(el, type, func) {
+    if (typeof el === 'string') {
+        el = query(el)
+    }
+    el.removeEventListener(type, func)
+}
+
+export function isNative(Ctor) {
+    return typeof Ctor === 'function' && /native code/.test(Ctor.toString())
+}
+
+export function doAsync(func) {
+    if (typeof Promise !== 'undefined' && isNative(Promise)) {
+        const p = Promise.resolve()
+        p.then(func)
+        return
+    }
+    if (typeof MessageChannel !== 'undefined' && (isNative(MessageChannel) || MessageChannel.toString() === '[object MessageChannelConstructor]')) {
+        const channel = new MessageChannel()
+        const port = channel.port2
+        channel.port1.onmessage = func
+        port.postMessage(1)
+        return
+    }
+    setTimeout(func, 0)
+}
+
+export function isEditorContainer(dom, selector) {
+    const els = document.querySelectorAll(selector)
+    if (!els.length) {
+        return null
+    }
+    if (dom.nodeName.toLowerCase() === "html") {
+        return null
+    }
+    for (var i = 0; i < els.length; i++) {
+        if (els[i] === dom.parentNode || els[i] === dom) {
+            return els[i]
+        }
+    }
+    return isEditorContainer(dom.parentNode, selector)
+}

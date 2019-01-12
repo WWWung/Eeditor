@@ -19,12 +19,21 @@ export function toInt(v) {
     return 0
 }
 
-export function max(...nums) {
+export function getMax(...nums) {
     nums = nums.filter(n => typeof n === 'number' && n === n)
     return Math.max(...nums)
 }
 
-export function min(...nums) {
+export function getMin(...nums) {
     nums = nums.filter(n => typeof n === 'number' && n === n)
     return Math.min(...nums)
+}
+
+export function unique(arr) {
+    const s = new Set(arr)
+    return [...s]
+}
+
+export function mergeObect(to, from) {
+    return Object.assign(to, from)
 }
