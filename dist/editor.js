@@ -72,6 +72,17 @@
       return Math.max.apply(Math, toConsumableArray(nums));
   }
 
+  function getMin() {
+      for (var _len2 = arguments.length, nums = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+          nums[_key2] = arguments[_key2];
+      }
+
+      nums = nums.filter(function (n) {
+          return typeof n === 'number' && n === n;
+      });
+      return Math.min.apply(Math, toConsumableArray(nums));
+  }
+
   function unique(arr) {
       var s = new Set(arr);
       return [].concat(toConsumableArray(s));
@@ -79,6 +90,19 @@
 
   function mergeObect(to, from) {
       return Object.assign(to, from);
+  }
+
+  function noop() {}
+
+  function doWithCheck(func, context) {
+      if (typeof func !== 'function') {
+          return;
+      }
+      if (context) {
+          func.call(context);
+      } else {
+          func();
+      }
   }
 
   function query(el) {
@@ -122,16 +146,32 @@
   function removeClass(el, cls) {
       el.classList.remove(cls);
   }
-
-  function bind(el, type, func) {
+  /**
+   * 
+   * @param {nodeType|string|NodeList|HTMLCollection} el 需要绑定事件的dom元素
+   * @param {string} type 事件类型
+   * @param {function} func 触发时需要执行的函数
+   * @param {boolean} needPatch 是否需要储存事件对象
+   */
+  function bind(el, type, func, needPatch) {
       if (typeof el === 'string') {
           el = query(el);
-      }
-      try {
           el.addEventListener(type, func);
-      } catch (error) {
-          console.log(error);
-          console.log(el);
+          if (needPatch) {
+              el['$' + type] = new Event(type);
+          }
+      } else if (el instanceof NodeList || el instanceof HTMLCollection) {
+          for (var i = 0; i < el.length; i++) {
+              el[i].addEventListener(type, func);
+              if (needPatch) {
+                  el[i]['$' + type] = new Event(type);
+              }
+          }
+      } else {
+          el.addEventListener(type, func);
+          if (needPatch) {
+              el['$' + type] = new Event(type);
+          }
       }
   }
 
@@ -156,6 +196,19 @@
           }
       }
       return isEditorContainer(dom.parentNode, selector);
+  }
+
+  function domBlur(dom, func) {
+      bind(document.body, 'click', blur);
+
+      function blur(e) {
+          var target = e.target;
+          if (dom !== target && !dom.contains(target)) {
+              doWithCheck(func);
+              dom.style.display = 'none';
+              off(document.body, 'click', blur);
+          }
+      }
   }
 
   function initOpts(options, e) {
@@ -195,6 +248,10 @@
       return document.queryCommandState(name);
   }
 
+  function queryCommandValue(name) {
+      return document.queryCommandValue(name);
+  }
+
   var Bold = function () {
       function Bold(e) {
           classCallCheck(this, Bold);
@@ -202,7 +259,7 @@
           this._active = false;
           this._editor = e;
           var uid = this._uid = 'bold-' + e._uid;
-          var el = this.el = elementCreater('<div class="ee-tool ee-tool-bold"></div>');
+          var el = this.el = elementCreater('<div class="ee-tool ee-tool-hover ee-tool-bold"></div>');
           var main = this.main = elementCreater('<div id="' + uid + '" class="ee-tool-normal bold-button eticon-bold"></div>');
           el.appendChild(main);
           bindEvent(this);
@@ -265,7 +322,7 @@
           this._active = false;
           this._editor = e;
           var uid = this._uid = 'italic-' + e._uid;
-          var el = this.el = elementCreater('<div class="ee-tool ee-tool-italic"></div>');
+          var el = this.el = elementCreater('<div class="ee-tool ee-tool-hover ee-tool-italic"></div>');
           var main = this.main = elementCreater('<div id="' + uid + '" class="ee-tool-normal italic-button eticon-italic"></div>');
           el.appendChild(main);
           bindEvent$1(this);
@@ -328,7 +385,7 @@
           this._active = false;
           this._editor = e;
           var uid = this._uid = 'lineThrough-' + e._uid;
-          var el = this.el = elementCreater('<div class="ee-tool ee-tool-lineThrough"></div>');
+          var el = this.el = elementCreater('<div class="ee-tool ee-tool-hover ee-tool-lineThrough"></div>');
           var main = this.main = elementCreater('<div id="' + uid + '" class="ee-tool-normal lineThrough-button eticon-lineThrough"></div>');
           el.appendChild(main);
           bindEvent$2(this);
@@ -396,7 +453,11 @@
       hStyle: {
           width: 200,
           height: 15
-      }
+      },
+      afterColorChange: noop,
+      afterShow: noop,
+      beforeHide: noop,
+      autoClose: true
   };
 
   var ColorPicker = function () {
@@ -409,26 +470,74 @@
           var el = opts.el;
           this.el = typeof el === 'string' ? query(el) : el;
           createPanel(this);
-          this.hsv = {
+          this._hsv = {
               h: 0,
-              s: 0,
-              v: 0
+              s: 1,
+              v: 1
           };
       }
 
       createClass(ColorPicker, [{
           key: 'show',
           value: function show() {
+              if (this.wrap && this.option.autoClose) {
+                  var that = this;
+                  domBlur(this.wrap, function () {
+                      that.beforeHide();
+                  });
+              }
               this.wrap && (this.wrap.style.display = 'block');
+              this.afterShow();
           }
       }, {
           key: 'hide',
           value: function hide() {
+              this.beforeHide();
               this.wrap && (this.wrap.style.display = 'none');
           }
       }, {
-          key: 'colorChange',
-          value: function colorChange() {}
+          key: 'hsv',
+          value: function hsv() {
+              return this._hsv;
+          }
+      }, {
+          key: 'rgb',
+          value: function rgb() {
+              return {
+                  r: this._rInput.value,
+                  g: this._gInput.value,
+                  b: this._bInput.value
+              };
+          }
+      }, {
+          key: 'hex',
+          value: function hex() {
+              return this._hexInput.value;
+          }
+      }, {
+          key: 'setHex',
+          value: function setHex(hex) {
+              this._hexInput.value = hex;
+              this._hexInput.dispatchEvent(this._hexInput.$blur);
+          }
+      }, {
+          key: 'afterColorChange',
+          value: function afterColorChange() {
+              var afterColorChange = this.option.afterColorChange;
+              doWithCheck(afterColorChange, this);
+          }
+      }, {
+          key: 'afterShow',
+          value: function afterShow() {
+              var afterShow = this.option.afterShow;
+              doWithCheck(afterShow, this);
+          }
+      }, {
+          key: 'beforeHide',
+          value: function beforeHide() {
+              var beforeHide = this.option.beforeHide;
+              doWithCheck(beforeHide, this);
+          }
       }]);
       return ColorPicker;
   }();
@@ -436,9 +545,14 @@
   function createPanel(c) {
       var cp = c.wrap = elementCreater('<div id="ew-cp-' + c.id + '" class="ew-cp"></div>');
       var hsvPanel = createHsvPanel(c);
-      var hPanel = createHPanel(c);
       cp.appendChild(hsvPanel);
+
+      var hPanel = createHPanel(c);
       cp.appendChild(hPanel);
+
+      var inputPanel = createInputPanel(c);
+      cp.appendChild(inputPanel);
+
       c.el.appendChild(cp);
   }
   //  取色板
@@ -446,7 +560,7 @@
       var timer = null;
       var hsvpStyle = c.option.hsvpStyle;
       var hsvPanel = c._back = elementCreater('<div id="ew-hsvp-' + c.id + '" style="width:' + hsvpStyle.width + 'px;height:' + hsvpStyle.height + 'px" class="ew-hsvp"><div class="ew-hsvp-m1"></div><div class="ew-hsvp-m2"></div></div>');
-      var hsvCusor = elementCreater('<span class="ew-hsvc"></span>');
+      var hsvCusor = c._hsvCusor = elementCreater('<span class="ew-hsvc"></span>');
       hsvPanel.appendChild(hsvCusor);
       bind(hsvPanel, 'mousedown', dragHsvc);
 
@@ -473,14 +587,21 @@
               hsvCusor.style.top = y + 'px';
               hsvCusor.style.left = x + 'px';
 
-              var s = c.hsv.s = (x + 6) / hsvpStyle.width;
-              var v = c.hsv.v = 1 - (y + 6) / hsvpStyle.height;
-              var rgb = hsvToRgb(c.hsv.h, s, v);
+              var s = c._hsv.s = (x + 6) / hsvpStyle.width;
+              var v = c._hsv.v = 1 - (y + 6) / hsvpStyle.height;
+              var rgb = hsvToRgb(c._hsv.h, s, v);
               var color = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
-              document.body.style.background = color;
+              c._preview.style.backgroundColor = color;
+              var r = c._rInput.value = rgb.r;
+              var g = c._gInput.value = rgb.g;
+              var b = c._bInput.value = rgb.b;
+
+              c._hexInput.value = rgbToHex(r, g, b);
           }, 10);
           bind('body', 'mousemove', dragHsvc);
           bind('body', 'mouseup', offDragHsvc);
+
+          c.afterColorChange();
 
           function offDragHsvc() {
               off('body', 'mousemove', dragHsvc);
@@ -494,7 +615,7 @@
   function createHPanel(c) {
       var hStyle = c.option.hStyle;
       var hPanel = elementCreater('<div id="ew-hp-' + c.id + '" style="width:' + hStyle.width + 'px;height:' + hStyle.height + 'px" class="ew-hp"></div>');
-      var hCursor = elementCreater('<span class="ew-hpc"></span>');
+      var hCursor = c._hCursor = elementCreater('<span class="ew-hpc"></span>');
       hPanel.appendChild(hCursor);
 
       bind(hPanel, 'mousedown', dragHc);
@@ -510,13 +631,28 @@
           if (x > hStyle.width - 2) {
               x = hStyle.width - 2;
           }
-
-          var h = c.hsv.h = (x + 2) / hStyle.width;
+          var hsv = c._hsv;
+          var h = hsv.h = (x + 2) / hStyle.width;
           var rgb = hsvToRgb(h, 1, 1);
           var color = 'rgb(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ')';
           c._back && (c._back.style.backgroundColor = color);
 
           hCursor.style.left = x + 'px';
+
+          var _hsvToRgb = hsvToRgb(h, hsv.s, hsv.v),
+              r = _hsvToRgb.r,
+              g = _hsvToRgb.g,
+              b = _hsvToRgb.b;
+
+          var hex = rgbToHex(r, g, b);
+          c._hexInput.value = hex;
+          c._rInput.value = r;
+          c._gInput.value = g;
+          c._bInput.value = b;
+          c._preview.style.backgroundColor = '#' + hex;
+
+          c.afterColorChange();
+
           bind('body', 'mousemove', dragHc);
           bind('body', 'mouseup', offDragHc);
 
@@ -527,6 +663,160 @@
       }
 
       return hPanel;
+  }
+  //  输入框
+  function createInputPanel(c) {
+      var wrap = elementCreater('<div class="ew-cip"></div>');
+      var row1 = elementCreater('<div class="ew-cip-row1 ew-cip-row"><div class="ew-cip-row-sub">R:<input value=255 class="ew-cip-i"></div><div class="ew-cip-row-sub">G:<input value=0 class="ew-cip-i"></div><div class="ew-cip-row-sub">B:<input value=0 class="ew-cip-i"></div></div>');
+      wrap.appendChild(row1);
+      var inputs = row1.querySelectorAll('.ew-cip-i');
+      var _rInput = c._rInput = inputs[0];
+      var _gInput = c._gInput = inputs[1];
+      var _bInput = c._bInput = inputs[2];
+
+      var row2 = elementCreater('<div class="ew-cip-row2 ew-cip-row"><div class="ew-cip-row-sub">HEX:#<input value="FF0000" maxlength=6 class="ew-cip-hex"></div><div class="ew-cip-row-sub ew-cip-pre"></div></div>');
+      var _hexInput = c._hexInput = row2.querySelector('.ew-cip-hex');
+      var pre = c._preview = row2.querySelector('.ew-cip-pre');
+      c._preview = row2.querySelector('.ew-cip-pre');
+      wrap.appendChild(row2);
+
+      bind(_hexInput, 'blur', hexInput, true);
+      bind(inputs, 'blur', rgbInput, true);
+
+      function hexInput() {
+          var hex = this.value = hexFomatter(this.value).toUpperCase();
+          var rgb = hexToRgb(hex);
+          var hsv = c._hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+          //  改变hpanel的位置
+          fixHcPos(hsv.h, c);
+
+          //  改变hsvCusor的位置
+          fixHsvcPos(hsv, c);
+
+          //  改变背景色
+          var rgb2 = hsvToRgb(hsv.h, 1, 1);
+          var color = 'rgb(' + rgb2.r + ',' + rgb2.g + ',' + rgb2.b + ')';
+          c._back && (c._back.style.backgroundColor = color);
+          pre.style.backgroundColor = '#' + hex;
+
+          c.afterColorChange();
+      }
+
+      function rgbInput() {
+          var v = this.value.replace(/[^0-9]/g, '');
+          v = toInt(v);
+          this.value = v > 255 ? 255 : v < 0 ? 0 : v;
+
+          var r = c._rInput.value;
+          var g = c._gInput.value;
+          var b = c._bInput.value;
+
+          var hex = rgbToHex(r, g, b);
+          c._hexInput.value = hex;
+          c._preview.style.backgroundColor = '#' + hex;
+          var hsv = c._hsv = rgbToHsv(r, g, b);
+
+          fixHcPos(hsv.h, c);
+          fixHsvcPos(hsv, c);
+
+          c.afterColorChange();
+      }
+
+      return wrap;
+  }
+
+  function fixHsvcPos(hsv, c) {
+      var hsvpStyle = c.option.hsvpStyle;
+      var l2 = hsv.s * hsvpStyle.width - 6;
+      var t2 = (1 - hsv.v) * hsvpStyle.height - 6;
+      var hsvCusor = c._hsvCusor;
+      hsvCusor && (hsvCusor.style.top = t2 + 'px') && (hsvCusor.style.left = l2 + 'px');
+  }
+
+  function fixHcPos(h, c) {
+      var l = h * c.option.hStyle.width - 2;
+      c._hCursor && (c._hCursor.style.left = l + 'px');
+  }
+
+  function hexFomatter(hex) {
+      hex = hex.replace(/[^A-Z|^a-z|^0-9]/g, '');
+      if (hex.length >= 6) {
+          hex = hex.substring(0, 6);
+      } else if (hex.length === 3) {
+          hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      } else {
+          for (var i = hex.length; i < 6; i++) {
+              hex += '0';
+          }
+      }
+      return hex;
+  }
+
+  //  颜色之间的相互转换
+  function rgbToHex(r, g, b) {
+      r = r.toString(16);
+      if (r.length == 1) {
+          r = '0' + r;
+      }
+      g = g.toString(16);
+      if (g.length == 1) {
+          g = '0' + g;
+      }
+      b = b.toString(16);
+      if (b.length == 1) {
+          b = '0' + b;
+      }
+      return (r + g + b).toUpperCase();
+  }
+
+  function hexToRgb(hex) {
+      var r = parseInt(hex.substr(0, 2), 16);
+      var g = parseInt(hex.substr(2, 2), 16);
+      var b = parseInt(hex.substr(4, 2), 16);
+      return { r: r, g: g, b: b };
+  }
+
+  function rgbToHsv(r, g, b) {
+      r = toInt(r);
+      g = toInt(g);
+      b = toInt(b);
+      var max = getMax(r, g, b);
+      var min = getMin(r, g, b);
+      var h = 0,
+          s = 0,
+          v = 0;
+
+      var sub = max - min;
+      if (max === min) {
+          h = 0;
+      } else {
+          if (r === max) {
+              if (g >= b) {
+                  h = 60 * (g - b) / sub;
+              } else {
+                  h = 60 * (g - b) / sub + 360;
+              }
+          } else if (g === max) {
+              h = 60 * (b - r) / sub + 120;
+          } else {
+              h = 60 * (r - g) / sub + 240;
+          }
+      }
+      if (h > 360) {
+          h -= 360;
+      } else if (h < 0) {
+          h += 360;
+      }
+      s = sub / max;
+      v = max / 255;
+      h /= 360;
+      s = isNaN(s) ? 0 : s;
+      return {
+          h: h,
+          s: s,
+          v: v
+      };
   }
 
   /**
@@ -591,24 +881,70 @@
 
           this._value = '#1A1A1A';
           this._editor = e;
-          var uid = this._uid = 'foreColor-' + e._uid;
-          var el = this.el = elementCreater('<div class="ee-tool ee-tool-foreColor"></div>');
-          var main = this.main = elementCreater('<div id="' + uid + '" class="ee-tool-normal foreColor-button eticon-color"></div>');
-          el.appendChild(main);
-          bindEvent$3(this);
 
-          this._active = false;
-          this._editor = e;
-          var cp = new ColorPicker({
-              el: this._editor._wrap
-          });
-          cp.show();
+          initCp(this);
+
+          var uid = this._uid = 'foreColor-' + e._uid;
+          var el = this.el = elementCreater('<div class="ee-tool ee-tool-hover ee-tool-foreColor"></div>');
+          var main = this.main = elementCreater('<div id="' + uid + '" class="ee-tool-normal foreColor-button eticon-color"><span></span></div>');
+          el.appendChild(main);
+
+          bindEvent$3(this);
       }
 
       createClass(ForeColor, [{
           key: 'query',
           value: function query$$1() {
-              var v = queryCommandState('bold');
+              this._value = this.main.querySelector('span').style.backgroundColor = queryCommandValue('foreColor');
+          }
+      }]);
+      return ForeColor;
+  }();
+
+  function bindEvent$3(c) {
+      bind(c.main, 'click', function (e) {
+          e.stopPropagation();
+          e.cancelBubble = true;
+          c._cp.show();
+      });
+  }
+
+  function initCp(c) {
+      var option = {
+          el: c._editor._wrap,
+          beforeHide: function beforeHide() {
+              c._editor._s.restoreSelection();
+              var hex = this.hex();
+              c.main.querySelector('span').style.backgroundColor = '#' + hex;
+              execCommand('foreColor', hex);
+              c._editor._s.saveRange();
+          }
+      };
+      c._cp = new ColorPicker(option);
+  }
+
+  function foreColor(e, toolbar) {
+      var ei = e.cmd.foreColor = new ForeColor(e);
+      toolbar.appendChild(ei.el);
+  }
+
+  var Underline = function () {
+      function Underline(e) {
+          classCallCheck(this, Underline);
+
+          this._active = false;
+          this._editor = e;
+          var uid = this._uid = 'underline-' + e._uid;
+          var el = this.el = elementCreater('<div class="ee-tool ee-tool-hover ee-tool-underline"></div>');
+          var main = this.main = elementCreater('<div id="' + uid + '" class="ee-tool-normal underline-button eticon-underline"></div>');
+          el.appendChild(main);
+          bindEvent$4(this);
+      }
+
+      createClass(Underline, [{
+          key: 'query',
+          value: function query$$1() {
+              var v = queryCommandState('underline');
               this._active = !!v;
               if (this._active) {
                   addClass(this.main, 'et-active');
@@ -620,7 +956,7 @@
           key: 'do',
           value: function _do() {
               var c = this;
-              execCommand('bold', null, function () {
+              execCommand('underline', null, function () {
                   c.query();
                   c._editor._s.saveRange();
               });
@@ -633,10 +969,10 @@
               }
           }
       }]);
-      return ForeColor;
+      return Underline;
   }();
 
-  function bindEvent$3(c) {
+  function bindEvent$4(c) {
       var el = c.main;
       var selection = c._editor._s;
       if (!el) {
@@ -650,8 +986,81 @@
       }
   }
 
-  function foreColor(e, toolbar) {
-      var ei = e.cmd.foreColor = new ForeColor(e);
+  function underline(e, toolbar) {
+      var ei = e.cmd.underline = new Underline(e);
+      toolbar.appendChild(ei.el);
+  }
+
+  var sizes = ['1', '2', '3', '4', '5', '6', '7'];
+
+  var FontSize = function () {
+      function FontSize(e) {
+          classCallCheck(this, FontSize);
+
+          this._active = false;
+          this._editor = e;
+          var uid = this._uid = 'fontSize-' + e._uid;
+          var el = this.el = elementCreater('<div class="ee-tool ee-tool-hover ee-tool-fontSize"></div>');
+
+          var html = '<select id="' + uid + '" class="ew-selector ew-selector-fontsize">';
+          for (var i = 0; i < sizes.length; i++) {
+              var size = sizes[i];
+              html += '<option value="' + size + '">' + size + '</option>';
+          }
+          html += '</select>';
+          var main = this.main = elementCreater(html);
+
+          el.appendChild(main);
+          bindEvent$5(this);
+      }
+
+      createClass(FontSize, [{
+          key: 'query',
+          value: function query$$1() {
+              var v = queryCommandState('fontSize');
+              this._active = !!v;
+              if (this._active) {
+                  addClass(this.main, 'et-active');
+              } else {
+                  removeClass(this.main, 'et-active');
+              }
+          }
+      }, {
+          key: 'do',
+          value: function _do(size) {
+              var c = this;
+              execCommand('fontSize', size, function () {
+                  c.query();
+                  c._editor._s.saveRange();
+              });
+          }
+      }, {
+          key: 'cancel',
+          value: function cancel() {
+              if (this._active) {
+                  this.do();
+              }
+          }
+      }]);
+      return FontSize;
+  }();
+
+  function bindEvent$5(c) {
+      var el = c.main;
+      var selection = c._editor._s;
+      if (!el) {
+          return;
+      }
+      bind(el, 'change', doo);
+
+      function doo() {
+          selection.restoreSelection();
+          c.do(this.value);
+      }
+  }
+
+  function fontSize(e, toolbar) {
+      var ei = e.cmd.fontSize = new FontSize(e);
       toolbar.appendChild(ei.el);
   }
 
@@ -659,7 +1068,9 @@
       bold: bold,
       italic: italic,
       lineThrough: lineThrough,
-      foreColor: foreColor
+      foreColor: foreColor,
+      underline: underline,
+      fontSize: fontSize
   };
 
   /**

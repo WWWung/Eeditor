@@ -1,13 +1,13 @@
 import { elementCreater, bind, addClass, removeClass } from "../utils/dom";
 import { execCommand, queryCommandState, queryCommandValue } from '../execCommand'
 
-class Bold {
+class Link {
     constructor(e) {
         this._active = false
         this._editor = e
-        const uid = this._uid = `bold-${e._uid}`
-        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-hover ee-tool-bold"></div>`)
-        const main = this.main = elementCreater(`<div id="${uid}" class="ee-tool-normal bold-button eticon-bold"></div>`)
+        const uid = this._uid = `link-${e._uid}`
+        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-hover ee-tool-link"></div>`)
+        const main = this.main = elementCreater(`<div id="${uid}" class="ee-tool-normal link-button eticon-link"></div>`)
         el.appendChild(main)
         bindEvent(this)
     }
@@ -52,7 +52,7 @@ function offEvent(el) {
 
 }
 
-export function bold(e, toolbar) {
-    const ei = e.cmd.bold = new Bold(e)
+export function link(e, toolbar) {
+    const ei = e.cmd.link = new Link(e)
     toolbar.appendChild(ei.el)
 }

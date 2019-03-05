@@ -37,3 +37,18 @@ export function unique(arr) {
 export function mergeObect(to, from) {
     return Object.assign(to, from)
 }
+
+export function noop() {
+
+}
+
+export function doWithCheck(func, context) {
+    if (typeof func !== 'function') {
+        return
+    }
+    if (context) {
+        func.call(context)
+    } else {
+        func()
+    }
+}

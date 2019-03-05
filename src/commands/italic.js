@@ -6,7 +6,7 @@ class Italic {
         this._active = false
         this._editor = e
         const uid = this._uid = `italic-${e._uid}`
-        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-italic"></div>`)
+        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-hover ee-tool-italic"></div>`)
         const main = this.main = elementCreater(`<div id="${uid}" class="ee-tool-normal italic-button eticon-italic"></div>`)
         el.appendChild(main)
         bindEvent(this)

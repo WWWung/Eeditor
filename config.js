@@ -4,8 +4,9 @@ import node from 'rollup-plugin-node-resolve'
 import postcss from 'rollup-plugin-postcss'
 import replace from 'rollup-plugin-replace'
 import babel from 'rollup-plugin-babel'
+import uglify from 'rollup-plugin-uglify'
 
-
+console.log(uglify, '======')
 const builds = {
     'web': {
         input: 'src/index.js',
@@ -27,6 +28,15 @@ const builds = {
             node(),
             cjs()
         ]
+    },
+    'min': {
+        input: 'src/index.js',
+        output: {
+            file: './dist/editor.min.js',
+            format: 'umd',
+            name: 'Eeditor'
+        },
+        plugins: [uglify.uglify()]
     }
 }
 

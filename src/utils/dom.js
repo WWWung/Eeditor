@@ -1,4 +1,4 @@
-import { warn, makeMap, toInt } from './other'
+import { warn, makeMap, toInt, doWithCheck } from './other'
 
 export function query(el) {
     if (typeof el === 'string') {
@@ -43,16 +43,32 @@ export function addClass(el, cls) {
 export function removeClass(el, cls) {
     el.classList.remove(cls)
 }
-
-export function bind(el, type, func) {
+/**
+ * 
+ * @param {nodeType|string|NodeList|HTMLCollection} el 需要绑定事件的dom元素
+ * @param {string} type 事件类型
+ * @param {function} func 触发时需要执行的函数
+ * @param {boolean} needPatch 是否需要储存事件对象
+ */
+export function bind(el, type, func, needPatch) {
     if (typeof el === 'string') {
         el = query(el)
-    }
-    try {
         el.addEventListener(type, func)
-    } catch (error) {
-        console.log(error)
-        console.log(el)
+        if (needPatch) {
+            el['$' + type] = new Event(type)
+        }
+    } else if (el instanceof NodeList || el instanceof HTMLCollection) {
+        for (var i = 0; i < el.length; i++) {
+            el[i].addEventListener(type, func)
+            if (needPatch) {
+                el[i]['$' + type] = new Event(type)
+            }
+        }
+    } else {
+        el.addEventListener(type, func)
+        if (needPatch) {
+            el['$' + type] = new Event(type)
+        }
     }
 }
 
@@ -97,4 +113,17 @@ export function isEditorContainer(dom, selector) {
         }
     }
     return isEditorContainer(dom.parentNode, selector)
+}
+
+export function domBlur(dom, func) {
+    bind(document.body, 'click', blur)
+
+    function blur(e) {
+        const target = e.target
+        if (dom !== target && !dom.contains(target)) {
+            doWithCheck(func)
+            dom.style.display = 'none'
+            off(document.body, 'click', blur)
+        }
+    }
 }

@@ -1,18 +1,18 @@
 import { elementCreater, bind, addClass, removeClass } from "../utils/dom";
 import { execCommand, queryCommandState, queryCommandValue } from '../execCommand'
 
-class Bold {
+class Underline {
     constructor(e) {
         this._active = false
         this._editor = e
-        const uid = this._uid = `bold-${e._uid}`
-        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-hover ee-tool-bold"></div>`)
-        const main = this.main = elementCreater(`<div id="${uid}" class="ee-tool-normal bold-button eticon-bold"></div>`)
+        const uid = this._uid = `underline-${e._uid}`
+        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-hover ee-tool-underline"></div>`)
+        const main = this.main = elementCreater(`<div id="${uid}" class="ee-tool-normal underline-button eticon-underline"></div>`)
         el.appendChild(main)
         bindEvent(this)
     }
     query() {
-        const v = queryCommandState('bold')
+        const v = queryCommandState('underline')
         this._active = !!v
         if (this._active) {
             addClass(this.main, 'et-active')
@@ -22,7 +22,7 @@ class Bold {
     }
     do() {
         const c = this
-        execCommand('bold', null, function() {
+        execCommand('underline', null, function() {
             c.query()
             c._editor._s.saveRange()
         })
@@ -52,7 +52,7 @@ function offEvent(el) {
 
 }
 
-export function bold(e, toolbar) {
-    const ei = e.cmd.bold = new Bold(e)
+export function underline(e, toolbar) {
+    const ei = e.cmd.underline = new Underline(e)
     toolbar.appendChild(ei.el)
 }

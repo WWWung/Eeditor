@@ -6,7 +6,7 @@ class LineThrough {
         this._active = false
         this._editor = e
         const uid = this._uid = `lineThrough-${e._uid}`
-        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-lineThrough"></div>`)
+        const el = this.el = elementCreater(`<div class="ee-tool ee-tool-hover ee-tool-lineThrough"></div>`)
         const main = this.main = elementCreater(`<div id="${uid}" class="ee-tool-normal lineThrough-button eticon-lineThrough"></div>`)
         el.appendChild(main)
         bindEvent(this)
